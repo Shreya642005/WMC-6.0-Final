@@ -7,7 +7,7 @@ import MissionFilters from "@/components/MissionFilters";
 import MissionMap from "@/components/MissionMap";
 import MissionNotification from "@/components/MissionNotification";
 import { Button } from "@/components/ui/Button";
-import { Plus, Zap } from "lucide-react";
+import { Plus, Zap, Trash2 } from "lucide-react";
 
 export default function AllMissionsPage() {
   const [missions, setMissions] = useState([])
@@ -104,10 +104,22 @@ export default function AllMissionsPage() {
     }
   }
 
+  // 🔹 Delete single mission
+  const deleteMission = (id) => {
+    const updated = missions.filter((m) => m.id !== id)
+    setMissions(updated)
+    localStorage.setItem("missions", JSON.stringify(updated)) // keep storage in sync
+  }
+
+  // 🔹 Clear all missions
+  const clearAllMissions = () => {
+    setMissions([])
+    localStorage.removeItem("missions")
+  }
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-[#151414] flex items-center justify-center">
-        {/* Background elements for loading state */}
         <img
           src="/images/BackgroundLogo.png"
           alt="Background Logo"
@@ -123,7 +135,7 @@ export default function AllMissionsPage() {
 
   return (
     <div className="all-missions-page min-h-screen bg-[#151414] relative">
-      {/* Spider-Man Background Elements */}
+      {/* Background */}
       <img
         src="/images/BackgroundLogo.png"
         alt="Background Logo"
@@ -158,11 +170,15 @@ export default function AllMissionsPage() {
           <div className="mt-6 flex items-center justify-center gap-4 flex-wrap">
             <div className="bg-red-600/20 border border-red-500/30 rounded-lg px-4 py-2 flex items-center gap-2">
               <Zap className="w-5 h-5 text-red-400" />
-              <span className="text-red-400 font-medium">🕸️ {activeMissionsCount} active missions and counting...</span>
+              <span className="text-red-400 font-medium">🕸️ {activeMissionsCount} active missions...</span>
             </div>
             <Button onClick={addDemoMission} className="bg-red-600 hover:bg-red-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Demo Mission
+            </Button>
+            <Button onClick={clearAllMissions} className="bg-gray-700 hover:bg-gray-800 text-white">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All Missions
             </Button>
           </div>
         </div>
@@ -189,6 +205,12 @@ export default function AllMissionsPage() {
                   isHighlighted={mission.id === selectedMissionId}
                   onClick={() => setSelectedMissionId(mission.id)}
                 />
+                <Button
+                  onClick={() => deleteMission(mission.id)}
+                  className="mt-2 w-full bg-red-700 hover:bg-red-800 text-white"
+                >
+                  Delete Mission
+                </Button>
               </div>
             ))}
           </div>
@@ -208,7 +230,7 @@ export default function AllMissionsPage() {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No missions found</h3>
-            <p className="text-gray-400">Try adjusting your filters or check back later for new missions.</p>
+            <p className="text-gray-400">Try adjusting your filters or add a new mission.</p>
           </div>
         )}
       </div>

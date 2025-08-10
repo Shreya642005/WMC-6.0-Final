@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import "../styles/missionForm.css"
+import { useState } from "react";
+import "../styles/missionForm.css";
 
 const MissionFormPage = () => {
   const [formData, setFormData] = useState({
@@ -12,99 +12,106 @@ const MissionFormPage = () => {
     place: "",
     fullDescription: "",
     image: null,
-  })
+  });
 
-  const [errors, setErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.missionTitle.trim()) {
-      newErrors.missionTitle = "Mission title is required"
+      newErrors.missionTitle = "Mission title is required";
     }
 
     if (!formData.shortDescription.trim()) {
-      newErrors.shortDescription = "Short description is required"
+      newErrors.shortDescription = "Short description is required";
     }
 
     if (!formData.date) {
-      newErrors.date = "Date is required"
+      newErrors.date = "Date is required";
     }
 
     if (!formData.place.trim()) {
-      newErrors.place = "Location is required"
+      newErrors.place = "Location is required";
     }
 
     if (!formData.fullDescription.trim()) {
-      newErrors.fullDescription = "Full description is required"
+      newErrors.fullDescription = "Full description is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Clear error when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  }
+  };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    handleInputChange("image", file)
-  }
+    const file = e.target.files[0];
+    handleInputChange("image", file);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("http://localhost:5000/api/missions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          missionTitle: formData.missionTitle,
+          shortDescription: formData.shortDescription,
+          date: formData.date,
+          time: formData.time,
+          place: formData.place,
+          fullDescription: formData.fullDescription,
+          imageUrl: formData.image ? formData.image.name : null, // placeholder for now
+        }),
+      });
 
-      // Show success modal
-      setShowSuccessModal(true)
+      if (!response.ok) throw new Error("Failed to save mission");
 
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false)
-        setFormData({
-          missionTitle: "",
-          shortDescription: "",
-          date: "",
-          time: "",
-          place: "",
-          fullDescription: "",
-          image: null,
-        })
-        // Reset file input
-        const fileInput = document.getElementById("image-upload")
-        if (fileInput) fileInput.value = ""
-      }, 3000)
+      setShowSuccessModal(true);
+
+      setFormData({
+        missionTitle: "",
+        shortDescription: "",
+        date: "",
+        time: "",
+        place: "",
+        fullDescription: "",
+        image: null,
+      });
+
+      const fileInput = document.getElementById("image-upload");
+      if (fileInput) fileInput.value = "";
+
     } catch (error) {
-      console.error("Error submitting mission:", error)
+      console.error("Error submitting mission:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const closeModal = () => {
-    setShowSuccessModal(false)
-  }
+    setShowSuccessModal(false);
+  };
 
   return (
-    <div className="mission-form-container bg-[#151414] min-h-screen pt-24 relative"> {/* Updated background and added relative positioning */}
-      {/* Spider-Man Background Elements */}
+    <div className="mission-form-container bg-[#151414] min-h-screen pt-24 relative">
       <img
         src="/images/BackgroundLogo.png"
         alt="Background Logo"
@@ -121,7 +128,6 @@ const MissionFormPage = () => {
         alt="web-top-right"
       />
 
-      {/* Header */}
       <div className="form-header relative z-10">
         <div className="header-icon">
           <svg viewBox="0 0 24 24" fill="currentColor">
@@ -134,9 +140,7 @@ const MissionFormPage = () => {
         </div>
       </div>
 
-      {/* Main Form */}
       <div className="form-wrapper relative z-10">
-        {/* Form Card */}
         <div className="form-card">
           <div className="card-header">
             <div className="card-icon">M</div>
@@ -188,7 +192,7 @@ const MissionFormPage = () => {
               )}
             </div>
 
-            {/* Date and Time Row */}
+            {/* Date and Time */}
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="date" className="form-label">
@@ -294,7 +298,11 @@ const MissionFormPage = () => {
 
             {/* Submit Button */}
             <div className="form-submit">
-              <button type="submit" disabled={isSubmitting} className={`submit-button ${isSubmitting ? "loading" : ""}`}>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`submit-button ${isSubmitting ? "loading" : ""}`}
+              >
                 {isSubmitting ? (
                   <>
                     <div className="loading-spinner"></div>
@@ -312,7 +320,6 @@ const MissionFormPage = () => {
         </div>
       </div>
 
-      {/* Success Modal */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="success-modal" onClick={(e) => e.stopPropagation()}>
@@ -328,7 +335,7 @@ const MissionFormPage = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MissionFormPage
+export default MissionFormPage;

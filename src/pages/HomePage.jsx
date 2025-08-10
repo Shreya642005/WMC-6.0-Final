@@ -41,10 +41,10 @@ export default function HomePage() {
         <section ref={aboutRef} className="scroll-mt-20">
           <About />
         </section>
-
         <section ref={missionsRef} className="scroll-mt-20">
           <MissionPreview />
         </section>
+
 
         <footer
           ref={footerRef}
