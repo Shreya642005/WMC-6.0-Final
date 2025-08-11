@@ -10,6 +10,8 @@ const MissionFormPage = () => {
     date: "",
     time: "",
     place: "",
+    latitude: "",
+    longitude: "",
     fullDescription: "",
     image: null,
   });
@@ -36,7 +38,12 @@ const MissionFormPage = () => {
     if (!formData.place.trim()) {
       newErrors.place = "Location is required";
     }
-
+    if (!formData.latitude) {
+      newErrors.latitude = "Latitude is required";
+    }
+    if (!formData.longitude) {
+      newErrors.longitude = "Longitude is required";
+    }
     if (!formData.fullDescription.trim()) {
       newErrors.fullDescription = "Full description is required";
     }
@@ -78,7 +85,9 @@ const MissionFormPage = () => {
           time: formData.time,
           place: formData.place,
           fullDescription: formData.fullDescription,
-          imageUrl: formData.image ? formData.image.name : null, // placeholder for now
+          imageUrl: formData.image ? formData.image.name : null,
+          latitude: formData.latitude ,
+          longitude: formData.longitude,
         }),
       });
 
@@ -93,12 +102,13 @@ const MissionFormPage = () => {
         time: "",
         place: "",
         fullDescription: "",
+        latitude: "",
+        longitude: "",
         image: null,
       });
 
       const fileInput = document.getElementById("image-upload");
       if (fileInput) fileInput.value = "";
-
     } catch (error) {
       console.error("Error submitting mission:", error);
     } finally {
@@ -158,7 +168,9 @@ const MissionFormPage = () => {
                 type="text"
                 id="missionTitle"
                 value={formData.missionTitle}
-                onChange={(e) => handleInputChange("missionTitle", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("missionTitle", e.target.value)
+                }
                 placeholder="e.g., Night Patrol"
                 className={`form-input ${errors.missionTitle ? "error" : ""}`}
               />
@@ -180,9 +192,13 @@ const MissionFormPage = () => {
                 type="text"
                 id="shortDescription"
                 value={formData.shortDescription}
-                onChange={(e) => handleInputChange("shortDescription", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("shortDescription", e.target.value)
+                }
                 placeholder="Brief mission summary (1-2 lines)"
-                className={`form-input ${errors.shortDescription ? "error" : ""}`}
+                className={`form-input ${
+                  errors.shortDescription ? "error" : ""
+                }`}
               />
               {errors.shortDescription && (
                 <div className="error-message">
@@ -251,6 +267,50 @@ const MissionFormPage = () => {
               )}
             </div>
 
+            {/* Latitude */}
+            <div className="form-group">
+              <label htmlFor="latitude" className="form-label">
+                <span className="label-icon">📍</span>
+                Latitude *
+              </label>
+              <input
+                type="text"
+                id="latitude"
+                value={formData.latitude}
+                onChange={(e) => handleInputChange("latitude", e.target.value)}
+                placeholder="e.g., 40.7128"
+                className={`form-input ${errors.latitude ? "error" : ""}`}
+              />
+              {errors.latitude && (
+                <div className="error-message">
+                  <span className="error-icon">⚠️</span>
+                  {errors.latitude}
+                </div>
+              )}
+            </div>
+
+            {/* Longitude */}
+            <div className="form-group">
+              <label htmlFor="longitude" className="form-label">
+                <span className="label-icon">📍</span>
+                Longitude *
+              </label>
+              <input
+                type="text"
+                id="longitude"
+                value={formData.longitude}
+                onChange={(e) => handleInputChange("longitude", e.target.value)}
+                placeholder="e.g., -74.0060"
+                className={`form-input ${errors.longitude ? "error" : ""}`}
+              />
+              {errors.longitude && (
+                <div className="error-message">
+                  <span className="error-icon">⚠️</span>
+                  {errors.longitude}
+                </div>
+              )}
+            </div>
+
             {/* Full Description */}
             <div className="form-group">
               <label htmlFor="fullDescription" className="form-label">
@@ -260,10 +320,14 @@ const MissionFormPage = () => {
               <textarea
                 id="fullDescription"
                 value={formData.fullDescription}
-                onChange={(e) => handleInputChange("fullDescription", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("fullDescription", e.target.value)
+                }
                 placeholder="Detailed mission story and outcomes..."
                 rows="6"
-                className={`form-textarea ${errors.fullDescription ? "error" : ""}`}
+                className={`form-textarea ${
+                  errors.fullDescription ? "error" : ""
+                }`}
               />
               {errors.fullDescription && (
                 <div className="error-message">
@@ -290,7 +354,9 @@ const MissionFormPage = () => {
                 <label htmlFor="image-upload" className="file-upload-label">
                   <div className="upload-icon">📤</div>
                   <span className="upload-text">
-                    {formData.image ? formData.image.name : "Click to upload mission photo"}
+                    {formData.image
+                      ? formData.image.name
+                      : "Click to upload mission photo"}
                   </span>
                 </label>
               </div>
@@ -322,11 +388,15 @@ const MissionFormPage = () => {
 
       {showSuccessModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="success-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-icon">✅</div>
             <h3 className="modal-title">Mission Logged Successfully!</h3>
             <p className="modal-message">
-              Your mission has been added to the Web-Crawler Database. Great work, Spider-Man!
+              Your mission has been added to the Web-Crawler Database. Great
+              work, Spider-Man!
             </p>
             <button onClick={closeModal} className="modal-close-button">
               Continue

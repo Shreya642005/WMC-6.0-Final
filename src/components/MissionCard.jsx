@@ -1,37 +1,47 @@
+// src/components/MissionCard.jsx
 "use client"
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, AlertTriangle, CheckCircle, Loader } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Clock, AlertTriangle, CheckCircle, Loader } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const urgencyStyles = {
   low: "bg-green-500/20 text-green-400 border-green-500/30",
   medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
   high: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   critical: "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse",
-}
+};
 
 const statusStyles = {
   active: "bg-red-500/20 text-red-400 border-red-500/30",
   "in-progress": "bg-blue-500/20 text-blue-400 border-blue-500/30",
   completed: "bg-green-500/20 text-green-400 border-green-500/30",
-}
+};
 
 function StatusIcon({ status }) {
-  if (status === "active") return <AlertTriangle className="w-4 h-4" />
-  if (status === "in-progress") return <Loader className="w-4 h-4 animate-spin" />
-  if (status === "completed") return <CheckCircle className="w-4 h-4" />
-  return null
+  if (status === "active") return <AlertTriangle className="w-4 h-4" />;
+  if (status === "in-progress") return <Loader className="w-4 h-4 animate-spin" />;
+  if (status === "completed") return <CheckCircle className="w-4 h-4" />;
+  return null;
 }
 
 export default function MissionCard({ mission, isHighlighted = false, onClick }) {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Apply defaults in case some fields are missing
+  const title = mission.title || mission.missionTitle || "Untitled Mission";
+  const description = mission.description || mission.shortDescription || mission.fullDescription || "No description available.";
+  const date = mission.date || "Unknown date";
+  const time = mission.time || "00:00";
+  const location = mission.location || mission.place || "Unknown location";
+  const urgency = (mission.urgency || "low").toLowerCase();
+  const status = (mission.status || "active").toLowerCase();
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100)
-    return () => clearTimeout(timer)
-  }, [])
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <Card
@@ -43,7 +53,7 @@ export default function MissionCard({ mission, isHighlighted = false, onClick })
         ${isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
       `}
       onClick={onClick}
-      data-urgency={mission.urgency}
+      data-urgency={urgency}
     >
       {/* Spider web overlay */}
       <div className="absolute inset-0 opacity-10">
@@ -55,34 +65,34 @@ export default function MissionCard({ mission, isHighlighted = false, onClick })
 
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-bold text-white">{mission.title}</h3>
+          <h3 className="text-lg font-bold text-white">{title}</h3>
           <div className="flex gap-2">
-            <Badge className={urgencyStyles[mission.urgency]}>{mission.urgency}</Badge>
-            <Badge className={statusStyles[mission.status]}>
-              <StatusIcon status={mission.status} />
-              <span className="ml-1 capitalize">{mission.status.replace("-", " ")}</span>
+            <Badge className={urgencyStyles[urgency]}>{urgency}</Badge>
+            <Badge className={statusStyles[status]}>
+              <StatusIcon status={status} />
+              <span className="ml-1 capitalize">{status.replace("-", " ")}</span>
             </Badge>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-3">
-        <p className="text-gray-300 text-sm leading-relaxed">{mission.description}</p>
+        <p className="text-gray-300 text-sm leading-relaxed">{description}</p>
 
         <div className="flex items-center gap-4 text-sm text-gray-400">
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
             <span>
-              {mission.date} at {mission.time}
+              {date} at {time}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <MapPin className="w-4 h-4" />
-            <span>{mission.location}</span>
+            <span>{location}</span>
           </div>
         </div>
 
-        {mission.urgency === "critical" && (
+        {urgency === "critical" && (
           <div className="flex items-center gap-2 text-red-400 text-sm font-medium">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
             <span>URGENT: Immediate attention required!</span>
@@ -90,5 +100,5 @@ export default function MissionCard({ mission, isHighlighted = false, onClick })
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

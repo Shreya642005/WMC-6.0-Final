@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getMissions, addMission } from "@/lib/missions";
 import MissionCard from "@/components/MissionCard";
 import MissionFilters from "@/components/MissionFilters";
 import MissionMap from "@/components/MissionMap";
@@ -10,112 +9,113 @@ import { Button } from "@/components/ui/Button";
 import { Plus, Zap, Trash2 } from "lucide-react";
 
 export default function AllMissionsPage() {
-  const [missions, setMissions] = useState([])
+  const [missions, setMissions] = useState([]);
   const [filters, setFilters] = useState({
     urgency: "all",
     status: "all",
     area: "all",
     sortBy: "date",
     sortOrder: "desc",
-  })
-  const [viewMode, setViewMode] = useState("cards")
-  const [selectedMissionId, setSelectedMissionId] = useState(null)
-  const [newMissionNotification, setNewMissionNotification] = useState(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+  });
+  const [viewMode, setViewMode] = useState("cards");
+  const [selectedMissionId, setSelectedMissionId] = useState(null);
+  const [newMissionNotification, setNewMissionNotification] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Fetch missions from MongoDB Atlas via backend API
   useEffect(() => {
-    try {
-      const loadedMissions = getMissions()
-      setMissions(loadedMissions)
-      setIsLoaded(true)
-    } catch (error) {
-      console.error("Failed to load missions:", error)
-      setIsLoaded(true)
-    }
-  }, [])
+    const fetchMissions = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/missions");
+        if (!res.ok) {
+          throw new Error(`Failed to fetch missions: ${res.statusText}`);
+        }
+        const data = await res.json();
+        setMissions(data);
+      } catch (err) {
+        console.error("Error fetching missions:", err);
+        setError(err.message);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    fetchMissions();
+  }, []);
 
   const filteredMissions = useMemo(() => {
-    if (!missions.length) return []
+    if (!missions.length) return [];
 
     const filtered = missions.filter((mission) => {
-      if (filters.urgency !== "all" && mission.urgency !== filters.urgency) return false
-      if (filters.status !== "all" && mission.status !== filters.status) return false
-      if (filters.area !== "all" && mission.area !== filters.area) return false
-      return true
-    })
+      if (filters.urgency !== "all" && mission.urgency !== filters.urgency) return false;
+      if (filters.status !== "all" && mission.status !== filters.status) return false;
+      if (filters.area !== "all" && mission.area !== filters.area) return false;
+      return true;
+    });
 
     filtered.sort((a, b) => {
-      let comparison = 0
+      let comparison = 0;
       switch (filters.sortBy) {
         case "date":
-          comparison = new Date(a.date + " " + a.time).getTime() - new Date(b.date + " " + b.time).getTime()
-          break
+          comparison = new Date(a.date + " " + a.time).getTime() - new Date(b.date + " " + b.time).getTime();
+          break;
         case "urgency":
-          const urgencyOrder = { low: 1, medium: 2, high: 3, critical: 4 }
-          comparison = urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
-          break
+          const urgencyOrder = { low: 1, medium: 2, high: 3, critical: 4 };
+          comparison = urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+          break;
         case "area":
-          comparison = a.area.localeCompare(b.area)
-          break
+          comparison = a.area.localeCompare(b.area);
+          break;
         default:
-          comparison = 0
+          comparison = 0;
       }
-      return filters.sortOrder === "desc" ? -comparison : comparison
-    })
+      return filters.sortOrder === "desc" ? -comparison : comparison;
+    });
 
-    return filtered
-  }, [missions, filters])
+    return filtered;
+  }, [missions, filters]);
 
-  const activeMissionsCount = missions.filter((m) => m.status === "active").length
+  const activeMissionsCount = missions.filter((m) => m.status === "active").length;
 
   const handleMissionSelect = (mission) => {
-    setSelectedMissionId(mission.id)
+    setSelectedMissionId(mission._id);
     if (viewMode === "map") {
-      setViewMode("cards")
+      setViewMode("cards");
     }
     setTimeout(() => {
-      const element = document.getElementById(`mission-${mission.id}`)
+      const element = document.getElementById(`mission-${mission._id}`);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    }, 100)
-  }
+    }, 100);
+  };
 
-  const addDemoMission = () => {
-    const demoMission = {
-      id: Date.now().toString(),
-      title: "Rhino Rampage Downtown",
-      description: "The Rhino is causing massive property damage in the financial district. Multiple vehicles overturned.",
-      date: new Date().toISOString().split("T")[0],
-      time: new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
-      location: "Wall Street",
-      coordinates: [40.7074, -74.0113],
-      urgency: "critical",
-      status: "active",
-      area: "Manhattan",
-    }
-
+  // Delete single mission from MongoDB
+  const deleteMission = async (id) => {
     try {
-      const updatedMissions = addMission(demoMission)
-      setMissions(updatedMissions)
-      setNewMissionNotification(demoMission)
-    } catch (error) {
-      console.error("Failed to add mission:", error)
+      const res = await fetch(`/api/missions/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error("Failed to delete mission");
+      }
+      setMissions((prev) => prev.filter((m) => m._id !== id));
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
 
-  // 🔹 Delete single mission
-  const deleteMission = (id) => {
-    const updated = missions.filter((m) => m.id !== id)
-    setMissions(updated)
-    localStorage.setItem("missions", JSON.stringify(updated)) // keep storage in sync
-  }
-
-  // 🔹 Clear all missions
-  const clearAllMissions = () => {
-    setMissions([])
-    localStorage.removeItem("missions")
-  }
+  // Clear all missions from MongoDB
+  const clearAllMissions = async () => {
+    try {
+      const res = await fetch(`/api/missions`, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error("Failed to clear missions");
+      }
+      setMissions([]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (!isLoaded) {
     return (
@@ -130,7 +130,11 @@ export default function AllMissionsPage() {
           <p className="text-white">Loading mission data...</p>
         </div>
       </div>
-    )
+    );
+  }
+
+  if (error) {
+    return <p className="text-center mt-10 text-red-500">Error: {error}</p>;
   }
 
   return (
@@ -172,10 +176,6 @@ export default function AllMissionsPage() {
               <Zap className="w-5 h-5 text-red-400" />
               <span className="text-red-400 font-medium">🕸️ {activeMissionsCount} active missions...</span>
             </div>
-            <Button onClick={addDemoMission} className="bg-red-600 hover:bg-red-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Demo Mission
-            </Button>
             <Button onClick={clearAllMissions} className="bg-gray-700 hover:bg-gray-800 text-white">
               <Trash2 className="w-4 h-4 mr-2" />
               Clear All Missions
@@ -195,18 +195,18 @@ export default function AllMissionsPage() {
           <div className="missions-grid grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredMissions.map((mission, index) => (
               <div
-                key={mission.id}
-                id={`mission-${mission.id}`}
+                key={mission._id}
+                id={`mission-${mission._id}`}
                 className="mission-card-wrapper"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <MissionCard
                   mission={mission}
-                  isHighlighted={mission.id === selectedMissionId}
-                  onClick={() => setSelectedMissionId(mission.id)}
+                  isHighlighted={mission._id === selectedMissionId}
+                  onClick={() => setSelectedMissionId(mission._id)}
                 />
                 <Button
-                  onClick={() => deleteMission(mission.id)}
+                  onClick={() => deleteMission(mission._id)}
                   className="mt-2 w-full bg-red-700 hover:bg-red-800 text-white"
                 >
                   Delete Mission
@@ -237,5 +237,5 @@ export default function AllMissionsPage() {
 
       <MissionNotification mission={newMissionNotification} onClose={() => setNewMissionNotification(null)} />
     </div>
-  )
+  );
 }

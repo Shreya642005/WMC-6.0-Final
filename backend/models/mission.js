@@ -10,4 +10,4 @@ const missionSchema = new mongoose.Schema({
   imageUrl: { type: String }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Mission", missionSchema);
+module.exports = mongoose.model("Mission", missionSchema);

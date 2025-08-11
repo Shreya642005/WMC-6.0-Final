@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
 });
 
 // Register a new user
-router.post("/register", async (req, res) => {
+router.post("/", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
