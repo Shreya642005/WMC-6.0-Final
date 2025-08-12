@@ -36,7 +36,7 @@ export default function MissionCard({ mission, isHighlighted = false, onClick })
   const time = mission.time || "00:00";
   const location = mission.location || mission.place || "Unknown location";
   const urgency = (mission.urgency || "low").toLowerCase();
-  const status = (mission.status || "active").toLowerCase();
+  const status = (mission.status || "completed").toLowerCase();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);

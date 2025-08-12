@@ -33,7 +33,7 @@ const Hero = ({ scrollToAbout, scrollToMissions }) => {
     <section className="relative min-h-screen pt-28 flex flex-col md:flex-row items-center justify-between px-6 md:px-16 text-white overflow-hidden">
       
       {/* Text Content */}
-      <div className="z-10 text-left max-w-xl mt-10 md:mt-0 transform translate-y-[-2.5rem] translate-x-4 md:translate-y-[-3.5rem] md:translate-x-6">
+      <div className="z-10 text-left max-w-xl mt-10 md:mt-0 transform translate-y-[-4.5rem] translate-x-2 md:translate-y-[-4.5rem] md:translate-x-4">
         <motion.h1
           className="text-[50px] md:text-[80px] leading-tight font-['Anton'] font-normal"
           initial={{ opacity: 0, x: -50 }}

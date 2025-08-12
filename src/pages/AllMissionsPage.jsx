@@ -12,7 +12,7 @@ export default function AllMissionsPage() {
   const [missions, setMissions] = useState([]);
   const [filters, setFilters] = useState({
     urgency: "all",
-    status: "all",
+    status: "completed",
     area: "all",
     sortBy: "date",
     sortOrder: "desc",
@@ -32,7 +32,13 @@ export default function AllMissionsPage() {
           throw new Error(`Failed to fetch missions: ${res.statusText}`);
         }
         const data = await res.json();
-        setMissions(data);
+        setMissions(
+          data.map((m) => ({
+            ...m,
+            // Normalize description so cards show shortDescription
+            description: m.shortDescription || m.description || m.fullDescription || "",
+          }))
+        );
       } catch (err) {
         console.error("Error fetching missions:", err);
         setError(err.message);
@@ -47,12 +53,16 @@ export default function AllMissionsPage() {
   const filteredMissions = useMemo(() => {
     if (!missions.length) return [];
 
-    const filtered = missions.filter((mission) => {
-      if (filters.urgency !== "all" && mission.urgency !== filters.urgency) return false;
-      if (filters.status !== "all" && mission.status !== filters.status) return false;
-      if (filters.area !== "all" && mission.area !== filters.area) return false;
-      return true;
-    });
+    const filtered = missions
+      // only completed missions should be shown
+      .filter((mission) => (mission.status || "completed").toLowerCase() === "completed")
+      // apply UI filters on top
+      .filter((mission) => {
+        if (filters.urgency !== "all" && mission.urgency !== filters.urgency) return false;
+        if (filters.status !== "all" && mission.status !== filters.status) return false;
+        if (filters.area !== "all" && mission.area !== filters.area) return false;
+        return true;
+      });
 
     filtered.sort((a, b) => {
       let comparison = 0;
@@ -65,7 +75,7 @@ export default function AllMissionsPage() {
           comparison = urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
           break;
         case "area":
-          comparison = a.area.localeCompare(b.area);
+          comparison = a.area?.localeCompare?.(b.area || "") || 0;
           break;
         default:
           comparison = 0;
@@ -76,7 +86,7 @@ export default function AllMissionsPage() {
     return filtered;
   }, [missions, filters]);
 
-  const activeMissionsCount = missions.filter((m) => m.status === "active").length;
+  const activeMissionsCount = missions.filter((m) => (m.status || "completed").toLowerCase() === "active").length;
 
   const handleMissionSelect = (mission) => {
     setSelectedMissionId(mission._id);
@@ -94,7 +104,7 @@ export default function AllMissionsPage() {
   // Delete single mission from MongoDB
   const deleteMission = async (id) => {
     try {
-      const res = await fetch(`/api/missions/${id}`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:5000/api/missions/${id}`, { method: "DELETE" });
       if (!res.ok) {
         throw new Error("Failed to delete mission");
       }
@@ -107,7 +117,7 @@ export default function AllMissionsPage() {
   // Clear all missions from MongoDB
   const clearAllMissions = async () => {
     try {
-      const res = await fetch(`/api/missions`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:5000/api/missions`, { method: "DELETE" });
       if (!res.ok) {
         throw new Error("Failed to clear missions");
       }
@@ -206,7 +216,11 @@ export default function AllMissionsPage() {
                   onClick={() => setSelectedMissionId(mission._id)}
                 />
                 <Button
-                  onClick={() => deleteMission(mission._id)}
+                  onClick={() => {
+                    if (window.confirm("Delete this mission? This cannot be undone.")) {
+                      deleteMission(mission._id);
+                    }
+                  }}
                   className="mt-2 w-full bg-red-700 hover:bg-red-800 text-white"
                 >
                   Delete Mission

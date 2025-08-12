@@ -6,8 +6,8 @@ const About = () => {
     <section className="min-h-screen flex items-center justify-center relative">
       <div className="container mx-auto px-6 py-20 relative z-10">
         <div className="max-w-4xl mx-auto">
-          {/* Heading with styling */}
-          <h2 className="text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#ff3131] to-[#a62121] mb-4 font-['Anton'] tracking-wider drop-shadow-lg">
+          {/* Heading with matching red gradient from Hero.jsx */}
+          <h2 className="text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#a62121] to-[#ff3131] mb-4 font-['Anton'] tracking-wider drop-shadow-lg">
             ABOUT THE DIARIES
           </h2>
           <div className="w-20 h-1 bg-red-500 mb-8 rounded"></div>

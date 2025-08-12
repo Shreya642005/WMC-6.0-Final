@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/missionForm.css";
 
 const MissionFormPage = () => {
@@ -18,7 +19,7 @@ const MissionFormPage = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // ✅ Added
 
   const validateForm = () => {
     const newErrors = {};
@@ -65,6 +66,8 @@ const MissionFormPage = () => {
     handleInputChange("image", file);
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,14 +89,14 @@ const MissionFormPage = () => {
           place: formData.place,
           fullDescription: formData.fullDescription,
           imageUrl: formData.image ? formData.image.name : null,
-          latitude: formData.latitude ,
+          latitude: formData.latitude,
           longitude: formData.longitude,
         }),
       });
 
       if (!response.ok) throw new Error("Failed to save mission");
 
-      setShowSuccessModal(true);
+      setShowSuccessModal(true); // ✅ Show success modal instead of alert
 
       setFormData({
         missionTitle: "",
@@ -118,6 +121,7 @@ const MissionFormPage = () => {
 
   const closeModal = () => {
     setShowSuccessModal(false);
+    navigate("/all-missions"); // ✅ Navigate after closing modal
   };
 
   return (
@@ -386,12 +390,10 @@ const MissionFormPage = () => {
         </div>
       </div>
 
+      {/* ✅ Success Modal */}
       {showSuccessModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div
-            className="success-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon">✅</div>
             <h3 className="modal-title">Mission Logged Successfully!</h3>
             <p className="modal-message">
